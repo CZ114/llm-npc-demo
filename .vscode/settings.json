@@ -67,5 +67,11 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "llm-npc-demo.slnx"
+    "dotnet.defaultSolution": "llm-npc-demo.slnx",
+    "editor.quickSuggestions": {
+        "other": "on",
+        "comments": "off",
+        "strings": "off"
+    },
+    "editor.suggestOnTriggerCharacters": true
 }

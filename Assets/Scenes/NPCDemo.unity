@@ -359,8 +359,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1f7f6dddc2630a489eafc271cdaa2ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPCInteractable
-  npcName: "\u963F\u8D35"
+  npcId: merchant
+  npcName: "\u5546\u4EBA\xB7\u963F\u8D35"
   dialogueLine: "\u5BA2\u5B98\u968F\u4FBF\u770B!\u5C0F\u672C\u751F\u610F,\u7AE5\u53DF\u65E0\u6B3A\u3002\u4E0D\u8FC7\u561B\u2026\u2026\u5728\u8FD9\u6751\u91CC,\u6D88\u606F\u4E5F\u662F\u8D27,\u5C31\u770B\u4F60\u62FF\u4EC0\u4E48\u6362\u4E86\u3002"
+  questState: not_started
 --- !u!1 &623489734
 GameObject:
   m_ObjectHideFlags: 0
@@ -532,6 +534,51 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &882690588
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 882690590}
+  - component: {fileID: 882690589}
+  m_Layer: 0
+  m_Name: NpcAgentClient
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &882690589
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 882690588}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7533ebc906f4e59429f189f89628ee5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NpcAgentClient
+  endpoint: http://127.0.0.1:8787/npc/chat
+--- !u!4 &882690590
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 882690588}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.6749, y: 0, z: 2.72029}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1247245489
 GameObject:
   m_ObjectHideFlags: 0
@@ -659,8 +706,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1f7f6dddc2630a489eafc271cdaa2ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPCInteractable
-  npcName: "\u94C1\u725B"
+  npcId: guard
+  npcName: "\u536B\u5175\xB7\u94C1\u725B"
   dialogueLine: "\u7AD9\u4F4F,\u4F8B\u884C\u76D8\u67E5\u3002\u2026\u2026\u6700\u8FD1\u6CB3\u8FB9\u4E0D\u592A\u5E73,\u591C\u91CC\u5C11\u5F80\u90A3\u8FB9\u53BB\u3002\u4E22\u4E86\u4E1C\u897F\u53EF\u6CA1\u4EBA\u66FF\u4F60\u635E\u3002"
+  questState: not_started
 --- !u!1 &1699836552
 GameObject:
   m_ObjectHideFlags: 0
@@ -788,8 +837,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1f7f6dddc2630a489eafc271cdaa2ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPCInteractable
-  npcName: "\u957F\u8001"
+  npcId: elder
+  npcName: "\u957F\u8001\xB7\u6C88\u9E64"
   dialogueLine: "\u5509,\u5E74\u7EAA\u5927\u4E86,\u8BB0\u6027\u4E5F\u8DDF\u7740\u8D70\u4E86\u2026\u2026\u6211\u90A3\u5757\u7956\u4F20\u7684\u6000\u8868,\u4E0D\u77E5\u53C8\u843D\u5728\u54EA\u513F\u4E86\u3002\u5E74\u8F7B\u4EBA,\u4F60\u8981\u662F\u78B0\u89C1,\u53EF\u5F97\u544A\u8BC9\u6211\u3002"
+  questState: accepted_watch_quest
 --- !u!4 &14894804198589402
 Transform:
   m_ObjectHideFlags: 0
@@ -3847,6 +3898,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractor
   interactRange: 2.5
   dialogueUI: {fileID: 623489735}
+  agentClient: {fileID: 882690589}
 --- !u!1 &8970576863416881486
 GameObject:
   m_ObjectHideFlags: 0
@@ -3970,3 +4022,4 @@ SceneRoots:
   - {fileID: 3542745207198290150}
   - {fileID: 807929544}
   - {fileID: 623489736}
+  - {fileID: 882690590}

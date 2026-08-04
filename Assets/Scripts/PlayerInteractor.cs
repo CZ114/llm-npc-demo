@@ -1,5 +1,6 @@
 
 using System.IO.Pipes;
+using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -8,9 +9,11 @@ public class PlayerInteractor : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private NPCInteractable _nearest;
+    private bool _waitingForAgentReply;
     public float interactRange = 2.5f;
 
     public DialogueUI dialogueUI;
+    public NpcAgentClient agentClient;
 
     void Start()
     {
@@ -23,7 +26,8 @@ public class PlayerInteractor : MonoBehaviour
             // 对话进行中:只听关闭键,其他全停(提前返回,避免对话时还在检测/开新对话)
     if (dialogueUI != null && dialogueUI.IsOpen)
     {
-        if (Keyboard.current != null &&
+        if (!_waitingForAgentReply &&
+            Keyboard.current != null &&
             (Keyboard.current.eKey.wasPressedThisFrame || Keyboard.current.escapeKey.wasPressedThisFrame))
         {
             dialogueUI.Hide();
@@ -63,10 +67,39 @@ public class PlayerInteractor : MonoBehaviour
 
     void HandleInteractInput()
     {
+        if (_waitingForAgentReply) return;
+
         if (_nearest && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
-            dialogueUI.Show(_nearest.npcName, _nearest.dialogueLine);
+            dialogueUI.Show(_nearest.npcName, "思考中...");
             SetPlayerControl(false);
+            _waitingForAgentReply = true;
+
+            if (agentClient == null)
+            {
+                dialogueUI.Show(_nearest.npcName, _nearest.dialogueLine);
+                _waitingForAgentReply = false;
+                return;
+            }
+
+            StartCoroutine(agentClient.RequestReply(
+                _nearest.npcId,
+                _nearest.npcName,
+                "你好，我想和你聊聊。",
+                _nearest.questState,
+                _nearest.dialogueLine,
+                reply =>
+                {
+                    dialogueUI.Show(_nearest.npcName, reply);
+                    _waitingForAgentReply = false;
+                },
+                error =>
+                {
+                    Debug.LogWarning($"NPC agent request failed: {error}");
+                    dialogueUI.Show(_nearest.npcName, _nearest.dialogueLine);
+                    _waitingForAgentReply = false;
+                }
+            ));
         }
     }
 

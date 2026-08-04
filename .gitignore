@@ -105,3 +105,9 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# Python FastAPI gateway local environment
+/gateway/.venv/
+/gateway/.pip-cache/
+/gateway/.tmp/
+/gateway/__pycache__/
