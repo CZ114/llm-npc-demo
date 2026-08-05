@@ -16,11 +16,18 @@ public class NpcAgentClient : MonoBehaviour
         public string quest_state;
         public string fallback_line;
     }
+    [Serializable]
+    private class ToolArgs
+    {
+        public string next_state;
+    }
 
     [Serializable]
     private class NpcChatResponse
     {
         public string reply;
+        public string tool_name;
+        public ToolArgs tool_args;
     }
 
     public IEnumerator RequestReply(
@@ -29,7 +36,7 @@ public class NpcAgentClient : MonoBehaviour
         string playerMessage,
         string questState,
         string npcLine,
-        Action<string> onSuccess,
+        Action<string,string,string> onSuccess,
         Action<string> onError
     )
     {
@@ -37,6 +44,7 @@ public class NpcAgentClient : MonoBehaviour
         {
             npc_id = npcId,
             npc_name = npcName,
+            player_message = playerMessage,
             quest_state = questState,
             fallback_line = npcLine
         };
@@ -66,7 +74,11 @@ public class NpcAgentClient : MonoBehaviour
             yield break;
         }
 
-        onSuccess?.Invoke(response.reply);
+        onSuccess?.Invoke(
+            response.reply,
+            response.tool_name,
+            response.tool_args != null ? response.tool_args.next_state:null
+        );
     }
 
 }

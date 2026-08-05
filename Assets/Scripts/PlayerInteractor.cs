@@ -1,7 +1,4 @@
-
-using System.IO.Pipes;
-using System.Net.NetworkInformation;
-using System.Runtime.CompilerServices;
+﻿
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -25,7 +22,7 @@ public class PlayerInteractor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-            // 对话进行中:只听关闭键,其他全停(提前返回,避免对话时还在检测/开新对话)
+            // 瀵硅瘽杩涜涓?鍙惉鍏抽棴閿?鍏朵粬鍏ㄥ仠(鎻愬墠杩斿洖,閬垮厤瀵硅瘽鏃惰繕鍦ㄦ娴?寮€鏂板璇?
     if (dialogueUI != null && dialogueUI.IsOpen)
     {
         if (!_waitingForAgentReply &&
@@ -67,6 +64,26 @@ public class PlayerInteractor : MonoBehaviour
         
     }
 
+    string BuildPlayerMessage(string npcId, string questState)
+    {
+        if (questState == "not_started" && npcId == "elder")
+        {
+            return "你好，我想了解祖传怀表的事情，也愿意帮忙寻找它。";
+        }
+
+        if (questState == "accepted_watch_quest" && npcId == "guard")
+        {
+            return "闀胯€佽鎴戝鎵剧浼犳€€琛ㄣ€備綘鏈€杩戝湪娌宠竟鏈夋病鏈夊彂鐜板紓甯革紵";
+        }
+
+        if (questState == "got_river_clue" && npcId == "elder")
+        {
+            return "我顺着河边线索找到了这块怀表，应该是您的。";
+        }
+
+        return "你好，我想和你聊聊。";
+    }
+
     void HandleInteractInput()
     {
         if (_waitingForAgentReply) return;
@@ -84,18 +101,22 @@ public class PlayerInteractor : MonoBehaviour
                 return;
             }
 
+            string currentQuestState = questStateManager != null ? questStateManager.CurrentState : _nearest.questState;
+            string playerMessage = BuildPlayerMessage(_nearest.npcId,currentQuestState);
+
             StartCoroutine(agentClient.RequestReply(
                 _nearest.npcId,
                 _nearest.npcName,
-                "你好，我想了解祖传怀表的事，也愿意帮忙寻找它。",
-                questStateManager != null ? questStateManager.CurrentState : _nearest.questState,
+                playerMessage,
+                currentQuestState,
                 _nearest.dialogueLine,
-                reply =>
+                (reply,toolName,nextState) =>
                 {
                     dialogueUI.Show(_nearest.npcName, reply);
-                    if (questStateManager != null)
+                    if (questStateManager != null && !string.IsNullOrWhiteSpace(nextState))
                     {
-                        questStateManager.AdvanceAfterConversation(_nearest.npcId);
+                        // questStateManager.AdvanceAfterConversation(_nearest.npcId);
+                        questStateManager.SetState(nextState);
                     }
                     _waitingForAgentReply = false;
                 },
@@ -117,7 +138,7 @@ public class PlayerInteractor : MonoBehaviour
         var anim = GetComponent<Animator>();
         if (anim != null && !enabled)
         {
-            anim.SetFloat("Speed", 0f);       // 不清零的话,对话中角色会原地跑步
+            anim.SetFloat("Speed", 0f);       // 涓嶆竻闆剁殑璇?瀵硅瘽涓鑹蹭細鍘熷湴璺戞
             anim.SetFloat("MotionSpeed", 0f);
         }
     }
