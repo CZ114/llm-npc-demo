@@ -87,7 +87,7 @@ public class PlayerInteractor : MonoBehaviour
             StartCoroutine(agentClient.RequestReply(
                 _nearest.npcId,
                 _nearest.npcName,
-                "你好，我想和你聊聊。",
+                "你好，我想了解祖传怀表的事，也愿意帮忙寻找它。",
                 questStateManager != null ? questStateManager.CurrentState : _nearest.questState,
                 _nearest.dialogueLine,
                 reply =>

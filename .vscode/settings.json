@@ -73,5 +73,9 @@
         "comments": "off",
         "strings": "off"
     },
-    "editor.suggestOnTriggerCharacters": true
+    "editor.suggestOnTriggerCharacters": true,
+    
+    "python.analysis.extraPaths": [
+    "D:/Imperial/individual/AgentFramework_build/project"
+
 }

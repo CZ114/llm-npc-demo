@@ -885,7 +885,7 @@ MonoBehaviour:
   npcId: elder
   npcName: "\u957F\u8001\xB7\u6C88\u9E64"
   dialogueLine: "\u5509,\u5E74\u7EAA\u5927\u4E86,\u8BB0\u6027\u4E5F\u8DDF\u7740\u8D70\u4E86\u2026\u2026\u6211\u90A3\u5757\u7956\u4F20\u7684\u6000\u8868,\u4E0D\u77E5\u53C8\u843D\u5728\u54EA\u513F\u4E86\u3002\u5E74\u8F7B\u4EBA,\u4F60\u8981\u662F\u78B0\u89C1,\u53EF\u5F97\u544A\u8BC9\u6211\u3002"
-  questState: accepted_watch_quest
+  questState: not_started
 --- !u!4 &14894804198589402
 Transform:
   m_ObjectHideFlags: 0
