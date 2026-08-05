@@ -36,3 +36,18 @@
 ### 下一步(第 2 周主线)
 
 把 DialogueUI.Show 的数据源从 NPCInteractable 硬编码台词换成 HTTP 调用自研 Agent 框架(FastAPI 网关):Unity 侧 UnityWebRequest/async 上报观测 + 拿回复,Python 侧 Persona 注入。先跑通单轮对话,再加流式/记忆。
+
+## 2026-08-05
+
+- **[结对,A 档]** 完成 Unity→FastAPI 单轮 NPC Agent 网关闭环:用户手写/接线 `NpcAgentClient.cs`、`PlayerInteractor.cs` 与 `gateway/npc_agent_gateway.py`,Codex 接手 Claude 记忆后给骨架、逐步 review 和排错。功能扩展为 Unity 侧通过 `UnityWebRequest` POST `/npc/chat`,上报 `npc_id / npc_name / player_message / quest_state / fallback_line`,后端按 `npc_id + quest_state` 返回 `reply`,DialogueUI 从硬编码 `NPCInteractable.dialogueLine` 过渡到网关回复。
+- **[用户手动,A 档]** 扩展 NPC 数据协议:`NPCInteractable` 增加稳定 `npcId` 与 `questState`,Inspector 为 elder/merchant/guard 配置状态;`PlayerInteractor` 增加 `agentClient` 引用、"思考中..."等待提示、等待期间冻结玩家控制与 `_waitingForAgentReply` 请求锁,避免快速连按 E 造成多次 POST 或提前关闭对话。
+- **排错记录**:先修复 `NpcAgentClient.endpoint` 未使用 warning(补全实际 HTTP 请求后消失);随后在"后端 200 OK 但 Unity 一直显示原 Dialogue Line"场景下,通过打印 `npc_id / quest_state / known states / repr / matched_reply` 定位到 Python 第 56 行误用 `npc_replies.get(request.npc_id)` 查状态字典,导致匹配失败后走 `fallback_line`;改为按 `request.quest_state` 查找后验收通过。
+- **剧情校准**:核对 Claude 记忆和聊天记录后确认正式任务线应沿用"长老丢祖传怀表 → 商人提供情报 → 卫兵给出河边线索 → 找回怀表";当前状态分支验证已跑通,下一步清理临时 debug print,把网关台词从临时"集市/木箱"修正回"河边线索",再接 `QuestStateManager` / `update_quest_state` 工具让状态自动推进。
+## 2026-08-05
+
+- **[用户手动,A 档]** 完成 `QuestStateManager.cs` 最小任务状态机并接入 `PlayerInteractor`:场景新增 `QuestManager` 对象,全局维护 `currentState`,Unity 对话请求改为读取 `questStateManager.CurrentState` 而不是每个 NPC Inspector 上的静态 `questState`。
+- **[结对,A 档]** 打通自动状态推进链路:与长老对话后由 `not_started` 推进到 `accepted_watch_quest`,与卫兵对话后推进到 `got_river_clue`;NPC 后端回复开始由全局任务状态驱动,验证商人/卫兵能根据新状态返回对应怀表线索台词。
+- **排错/设计记录**:本阶段先保持本地 C# 状态机推进,不急着接 LLM tool-call,原因是先建立可控 baseline:Unity 负责可靠状态落盘和输入事件,FastAPI 只按 `npc_id + quest_state` 生成回复。下一步再把状态推进迁移为显式 `update_quest_state` 工具协议,用于展示 Agent Tool Use。
+- **[结对,A 档]** Agent 框架接入前完成阶段边界确认:本阶段 MVP 定为"真实 Agent 框架驱动的一条短任务闭环",而不是完整长剧情系统。验收目标是 3 NPC / 4 状态怀表任务闭环(`not_started -> accepted_watch_quest -> got_river_clue -> watch_found`),Agent 根据 Persona、世界背景、任务状态与玩家输入生成回复,并至少返回一次 `update_quest_state` 工具调用。
+- **设计决策**:`QuestStateManager` 后续从"剧情判断器"降级为 Unity 侧"状态保存/校验/执行器";剧情推进逻辑迁移到 Agent/tool-call 输出。Unity 负责 observation 上报与 action 执行,FastAPI 网关负责适配 D 盘自研 Agent 框架,避免继续把 mock 后端做复杂。
+- **下一步**:只读检查 `D:\Imperial\individual\Music!!!\project\agent` 的 Agent/Tool Registry/Memory/FastAPI 入口,再决定 `gateway/npc_agent_gateway.py` 是直接 import 框架还是转发到框架服务。

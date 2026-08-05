@@ -15,6 +15,8 @@ public class PlayerInteractor : MonoBehaviour
     public DialogueUI dialogueUI;
     public NpcAgentClient agentClient;
 
+    public QuestStateManager questStateManager;
+
     void Start()
     {
         
@@ -86,11 +88,15 @@ public class PlayerInteractor : MonoBehaviour
                 _nearest.npcId,
                 _nearest.npcName,
                 "你好，我想和你聊聊。",
-                _nearest.questState,
+                questStateManager != null ? questStateManager.CurrentState : _nearest.questState,
                 _nearest.dialogueLine,
                 reply =>
                 {
                     dialogueUI.Show(_nearest.npcName, reply);
+                    if (questStateManager != null)
+                    {
+                        questStateManager.AdvanceAfterConversation(_nearest.npcId);
+                    }
                     _waitingForAgentReply = false;
                 },
                 error =>
