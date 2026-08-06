@@ -1,0 +1,29 @@
+{
+  "quest_id": "watch_quest",
+  "states": {
+    "not_started": "玩家还没有正式接下寻找怀表的任务。",
+    "accepted_watch_quest": "玩家已经答应长老寻找祖传怀表。",
+    "got_river_clue": "玩家已经从卫兵处获得河边线索。",
+    "watch_found": "玩家已经找回怀表。"
+  },
+  "allowed_transitions": [
+    {
+      "from": "not_started",
+      "to": "accepted_watch_quest",
+      "tool": "update_quest_state",
+      "condition": "玩家第一次和长老对话，并表达愿意帮忙寻找怀表。"
+    },
+    {
+      "from": "accepted_watch_quest",
+      "to": "got_river_clue",
+      "tool": "update_quest_state",
+      "condition": "玩家和卫兵对话，询问河边异常或怀表线索。"
+    },
+    {
+      "from": "got_river_clue",
+      "to": "watch_found",
+      "tool": "update_quest_state",
+      "condition": "玩家明确表示已经顺着河边线索找到了怀表。"
+    }
+  ]
+}

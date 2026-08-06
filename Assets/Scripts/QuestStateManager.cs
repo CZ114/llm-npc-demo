@@ -55,7 +55,12 @@ public class QuestStateManager : MonoBehaviour
             return true;
         }
 
-        if (fromState == "accepted_watch_quest" && toState == "watch_found")
+        if (fromState == "accepted_watch_quest" && toState == "got_river_clue")
+        {
+            return true;
+        }
+
+        if (fromState == "got_river_clue" && toState == "watch_found")
         {
             return true;
         }

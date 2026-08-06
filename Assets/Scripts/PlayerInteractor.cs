@@ -73,10 +73,15 @@ public class PlayerInteractor : MonoBehaviour
 
         if (questState == "accepted_watch_quest" && npcId == "guard")
         {
-            return "闀胯€佽鎴戝鎵剧浼犳€€琛ㄣ€備綘鏈€杩戝湪娌宠竟鏈夋病鏈夊彂鐜板紓甯革紵";
+            return "长老让我寻找祖传怀表。你最近在河边有没有发现异常？";
         }
 
         if (questState == "got_river_clue" && npcId == "elder")
+        {
+            return "我问到了河边的线索，但还没有找到怀表。";
+        }
+
+        if (questState == "watch_found" && npcId == "elder")
         {
             return "我顺着河边线索找到了这块怀表，应该是您的。";
         }

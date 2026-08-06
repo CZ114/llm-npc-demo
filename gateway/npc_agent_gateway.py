@@ -10,6 +10,7 @@ import re
 AGENT_FRAMEWORK_ROOT = Path(r"D:\Imperial\individual\AgentFramework_build\project")
 sys.path.insert(0, str(AGENT_FRAMEWORK_ROOT))
 
+
 from agent import Agent, AgentDeploy, create_registry
 
 app = FastAPI(title = "LLM NPC Demo Gateway")
@@ -29,7 +30,42 @@ class NpcChatResponse(BaseModel):
     tool_name:Optional[str] = None
     tool_args:Optional[ToolArgs] = None
 
+CONTEXT_DIR = Path(__file__).parent / "agent_context"
 
+def load_json(filename:str):
+    with open(CONTEXT_DIR/filename, "r", encoding="utf-8") as file:
+        return json.load(file)
+
+PERSONAS = load_json("personas.json")
+WORLD_CONTEXT = (CONTEXT_DIR / "world.md").read_text(encoding="utf-8")
+WATCH_QUEST = load_json("quest_watch.json")
+
+def format_persona(npc_id: str, fallback_name:str) -> str:
+    persona = PERSONAS.get(npc_id)
+
+    if persona is None:
+        return fallback_name
+
+    traits = "、".join(persona.get("traits",[]))
+    return(
+        f"{persona.get('name', fallback_name)}："
+        f"特性={traits}；"
+        f"说话风格={persona.get('speaking_style', '')}；"
+        f"任务角色={persona.get('role_in_quest', '')}"  
+    )
+
+def format_allowed_transitions() -> str:
+    lines = []
+
+    for transition in WATCH_QUEST.get("allowed_transitions",[]):
+        lines.append(
+            f"- 如果当前状态是 {transition['from']}，并且{transition['condition']}，"
+            f"你应该调用 {transition['tool']}(next_state=\"{transition['to']}\")."      
+        )
+
+    lines.append("- 不要让任务状态回退。不要调用不在 allowed_transitions 里的状态变化。")
+    return "\n".join(lines)
+    
 
 REPLIES_BY_STATE = {
     "elder": {
@@ -52,26 +88,6 @@ REPLIES_BY_STATE = {
     },
 }
 
-NPC_PERSONAS = {
-    "elder": "长老·沈鹤：慈祥、年迈、记性变差，但知道村子的旧秘密。说话温和，常把怀表称为祖传旧物。",
-    "merchant": "商人·阿贵：精明、市侩、消息灵通。喜欢把情报当成商品，但不是真正坏人。",
-    "guard": "卫兵·铁牛：嘴硬心软、守规矩、警惕河边异常。说话直接，表面严厉但会保护村民。",
-}
-
-WORLD_CONTEXT = """
-场景是一个小村子。长老丢失了一块祖传怀表。
-商人阿贵掌握村里的消息。
-卫兵铁牛最近在河边巡逻，因为那里夜里不太平。
-短任务线：长老丢怀表 -> 商人提示铁牛/河边 -> 卫兵给出河边线索 -> 玩家找回怀表。
-"""
-
-QUEST_STATE_DESCRIPTIONS = {
-    "not_started": "玩家还没有正式接下寻找怀表的任务。",
-    "accepted_watch_quest": "玩家已经答应长老寻找祖传怀表。",
-    "got_river_clue": "玩家已经从卫兵处获得河边线索。",
-    "watch_found": "玩家已经找回怀表。",
-}
-
 def run_agent_reply(request: NpcChatRequest):
     captured_tool_name = None
     captured_tool_args = None
@@ -81,7 +97,7 @@ def run_agent_reply(request: NpcChatRequest):
     @registry.tool(
         description = "Request Unity to update the current quest state. Use this only when the dialogue clearly advances the watch quest."
     )
-    def update_quest_sate(next_state: str) ->str:
+    def update_quest_state(next_state: str) ->str:
         """update the watch quest state in Unity.
         
         Args:
@@ -90,7 +106,7 @@ def run_agent_reply(request: NpcChatRequest):
         nonlocal captured_tool_name,captured_tool_args
         captured_tool_name = "update_quest_state"
         captured_tool_args = ToolArgs(next_state=next_state)
-        return f"Queued Unity quest state update: {next_state}"
+        return f"ok" #Queued Unity quest state update: {next_state}
 
     npc_id = request.npc_id.strip()
     quest_state = request.quest_state.strip()
@@ -99,19 +115,27 @@ def run_agent_reply(request: NpcChatRequest):
 你是Unity游戏里的 NPC Agent。你必须扮演当前NPC，并根据任务状态回答玩家。
 
 当前NPC：
-{NPC_PERSONAS.get(npc_id, request.npc_name)}
+{format_persona(npc_id, request.npc_name)}
 
 世界背景：
 {WORLD_CONTEXT}
 
 当前任务状态：
-{quest_state}: {QUEST_STATE_DESCRIPTIONS.get(quest_state, "未知状态")}
+{quest_state}: {WATCH_QUEST["states"].get(quest_state, "未知状态")}
 
 工具规则：
-- 如果如果玩家第一次和长老对话，并且当前状态是 not_started，你应该调用 update_quest_state(next_state="accepted_watch_quest")。
-- 如果玩家在 accepted_watch_quest 状态下和卫兵对话，你应该调用 update_quest_state(next_state="got_river_clue")。
-- 不要随意跳到 watch_found，除非明确收到玩家已经找到怀表的输入。
-- 最终回答必须是 NPC 对玩家说的一两句中文台词。
+{format_allowed_transitions()}
+关键剧情约束:
+- 当 npc_id 是 guard 且当前状态是 accepted_watch_quest 时，卫兵必须明确告诉玩家：昨晚河边芦苇荡有异常，有人影或翻找声，怀表可能在那里。
+- 当 npc_id 是 elder 且当前状态是 got_river_clue，并且玩家说已经找到怀表时，长老应该感谢玩家并收下怀表。
+- NPC 可以自然表演动作，但不要让动作描写盖过关键信息。
+
+输出规则:
+- 最终回答只能是当前 NPC 对玩家说的话。
+- 不要提到工具、函数、状态机、quest_state、next_state、任务状态已更新。
+- 不要用括号解释系统行为或工具结果。
+- 如果你调用了工具，也不要在最终回答里说明工具调用结果。
+- 台词必须自然地包含当前 NPC 应该给玩家的信息。
 """
     agent = Agent(
         client=AgentDeploy(temperature=0.4),
@@ -120,7 +144,7 @@ def run_agent_reply(request: NpcChatRequest):
         max_rounds=3
     )
 
-    user_text = f"玩家说{request.player_message}"
+    user_text = f"玩家说: {request.player_message}"
     reply = agent.send(user_text)
 
     return reply,captured_tool_name,captured_tool_args
