@@ -21,6 +21,8 @@ class NpcChatRequest(BaseModel):
     player_message:str
     quest_state: str
     fallback_line: str
+    has_watch: bool = False
+    nearby_item: Optional[str] = None
 
 class ToolArgs(BaseModel):
     next_state: str
@@ -101,7 +103,7 @@ def run_agent_reply(request: NpcChatRequest):
         """update the watch quest state in Unity.
         
         Args:
-        next_state: One of not_started, accepted_watch_quest, got_river_clue, watch_found.
+        next_state: One of not_started, accepted_watch_quest, got_river_clue, watch_found, quest_completed.
         """
         nonlocal captured_tool_name,captured_tool_args
         captured_tool_name = "update_quest_state"
@@ -125,6 +127,11 @@ def run_agent_reply(request: NpcChatRequest):
 
 工具规则：
 {format_allowed_transitions()}
+
+Unity 当前事实:
+- 玩家是否已经拥有怀表: {request.has_watch}
+- 玩家附近物品: {request.nearby_item or "无"}
+
 关键剧情约束:
 - 当 npc_id 是 guard 且当前状态是 accepted_watch_quest 时，卫兵必须明确告诉玩家：昨晚河边芦苇荡有异常，有人影或翻找声，怀表可能在那里。
 - 当 npc_id 是 elder 且当前状态是 got_river_clue，并且玩家说已经找到怀表时，长老应该感谢玩家并收下怀表。
@@ -159,6 +166,11 @@ def health():
 def npc_chat(request: NpcChatRequest):
     npc_id = request.npc_id.strip()
     quest_state = request.quest_state.strip()
+
+    print(
+        f"world_facts: has_watch={request.has_watch},"
+        f"nearby_item = {request.nearby_item}"
+    )
 
     try:
         reply, tool_name, tool_args = run_agent_reply(request)
@@ -195,6 +207,9 @@ def decide_tool_call(npc_id:str, quest_state:str):
 
     if npc_id == "guard" and quest_state == "accepted_watch_quest":
         return "update_quest_state", ToolArgs(next_state="got_river_clue")
+
+    if npc_id == "elder" and quest_state == "watch_found":
+        return "update_quest_state", ToolArgs(next_state="quest_completed")
 
     return None, None
 

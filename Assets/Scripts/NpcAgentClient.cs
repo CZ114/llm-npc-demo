@@ -15,6 +15,8 @@ public class NpcAgentClient : MonoBehaviour
         public string player_message;
         public string quest_state;
         public string fallback_line;
+        public bool has_watch;
+        public string nearby_item;
     }
     [Serializable]
     private class ToolArgs
@@ -36,6 +38,8 @@ public class NpcAgentClient : MonoBehaviour
         string playerMessage,
         string questState,
         string npcLine,
+        bool hasWatch,
+        string nearbyItem,
         Action<string,string,string> onSuccess,
         Action<string> onError
     )
@@ -46,7 +50,9 @@ public class NpcAgentClient : MonoBehaviour
             npc_name = npcName,
             player_message = playerMessage,
             quest_state = questState,
-            fallback_line = npcLine
+            fallback_line = npcLine,
+            has_watch = hasWatch,
+            nearby_item = nearbyItem
         };
 
         string json = JsonUtility.ToJson(requestBody);

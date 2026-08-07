@@ -440,6 +440,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WatchItem
   questStateManager: {fileID: 855275222}
+  dialogueUI: {fileID: 0}
   player: {fileID: 3066475787317000844}
   pickupRange: 2
   requiredState: got_river_clue
@@ -1016,6 +1017,51 @@ MonoBehaviour:
   npcName: "\u957F\u8001\xB7\u6C88\u9E64"
   dialogueLine: "\u5509,\u5E74\u7EAA\u5927\u4E86,\u8BB0\u6027\u4E5F\u8DDF\u7740\u8D70\u4E86\u2026\u2026\u6211\u90A3\u5757\u7956\u4F20\u7684\u6000\u8868,\u4E0D\u77E5\u53C8\u843D\u5728\u54EA\u513F\u4E86\u3002\u5E74\u8F7B\u4EBA,\u4F60\u8981\u662F\u78B0\u89C1,\u53EF\u5F97\u544A\u8BC9\u6211\u3002"
   questState: not_started
+--- !u!1 &1950762505
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1950762507}
+  - component: {fileID: 1950762506}
+  m_Layer: 0
+  m_Name: QuestDebugUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1950762506
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1950762505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df4adf85dd0b8a440b2b104a55c2c162, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::QuestDebugUI
+  questStateManager: {fileID: 855275222}
+--- !u!4 &1950762507
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1950762505}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 15.25328, y: 0.0474, z: 2.73632}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &14894804198589402
 Transform:
   m_ObjectHideFlags: 0
@@ -4201,3 +4247,4 @@ SceneRoots:
   - {fileID: 882690590}
   - {fileID: 855275223}
   - {fileID: 696241633}
+  - {fileID: 1950762507}

@@ -65,6 +65,11 @@ public class QuestStateManager : MonoBehaviour
             return true;
         }
 
+        if (fromState == "watch_found" && toState == "quest_completed")
+        {
+            return true;
+        }
+
         return false;
     }
 }

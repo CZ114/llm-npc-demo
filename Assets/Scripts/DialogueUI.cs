@@ -35,6 +35,12 @@ public class DialogueUI : MonoBehaviour
         _promptRoot.SetActive(true);
     }
 
+    public void ShowPromptText(string prompt)
+    {
+        _promptText.text = prompt;
+        _promptRoot.SetActive(true);
+    }
+
     public void HidePrompt()
     {
         _promptRoot.SetActive(false);

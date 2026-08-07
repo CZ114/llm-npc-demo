@@ -1,17 +1,17 @@
-
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class WatchItem : MonoBehaviour
 {
     [SerializeField] private QuestStateManager questStateManager;
+    [SerializeField] private DialogueUI dialogueUI;
     [SerializeField] private Transform player;
     [SerializeField] private float pickupRange = 2f;
     [SerializeField] private string requiredState = "got_river_clue";
     [SerializeField] private string nextState = "watch_found";
 
-    
-    
+    private bool _showingPickupPrompt;
+
     private void Start()
     {
         if (questStateManager == null)
@@ -19,43 +19,58 @@ public class WatchItem : MonoBehaviour
             questStateManager = FindFirstObjectByType<QuestStateManager>();
         }
 
+        if (dialogueUI == null)
+        {
+            dialogueUI = FindFirstObjectByType<DialogueUI>();
+        }
+
         if (player == null)
         {
-            GameObject playerObject = GameObject.FindGameObjectWithTag("player");
+            GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
             if (playerObject != null)
             {
                 player = playerObject.transform;
             }
         }
-        
     }
 
-    private void Update()
+    private void LateUpdate()
     {
-        if (questStateManager == null || player == null)
+        if (questStateManager == null || dialogueUI == null || player == null)
         {
             return;
         }
 
-        if (questStateManager.CurrentState != requiredState)
+        if (dialogueUI.IsOpen)
         {
             return;
         }
 
-        if (Keyboard.current == null || !Keyboard.current.eKey.wasPressedThisFrame)
-        {
-            return;
-        }
-
+        bool canPickup = questStateManager.CurrentState == requiredState;
         float distance = Vector3.Distance(transform.position, player.position);
-        if (distance > pickupRange)
+        bool playerInRange = distance <= pickupRange;
+
+        if (canPickup && playerInRange)
         {
+            dialogueUI.ShowPromptText("按 E 拾取怀表");
+            _showingPickupPrompt = true;
+
+            if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+            {
+                questStateManager.SetState(nextState);
+                Debug.Log("Watch picked up.");
+                dialogueUI.HidePrompt();
+                gameObject.SetActive(false);
+            }
+
             return;
         }
 
-        questStateManager.SetState(nextState);
-        Debug.Log("Watch picked up.");
-        gameObject.SetActive(false);
+        if (_showingPickupPrompt)
+        {
+            dialogueUI.HidePrompt();
+            _showingPickupPrompt = false;
+        }
     }
 
     private void OnDrawGizmosSelected()
@@ -63,5 +78,4 @@ public class WatchItem : MonoBehaviour
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, pickupRange);
     }
-
 }
