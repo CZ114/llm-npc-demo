@@ -2,6 +2,8 @@
 
 This folder contains a project-local FastAPI environment for the Unity NPC demo.
 
+The endpoint uses scripted quest dialogue when the separate Agent framework is absent. To enable model-backed replies, install a compatible framework or set `AGENT_FRAMEWORK_ROOT` to its project directory; configure credentials outside this repository.
+
 ## Location
 
 - Virtual environment: `gateway/.venv`

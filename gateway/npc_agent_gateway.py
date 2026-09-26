@@ -2,16 +2,20 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import time
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Optional
 import re
 
-AGENT_FRAMEWORK_ROOT = Path(r"D:\Imperial\individual\AgentFramework_build\project")
-sys.path.insert(0, str(AGENT_FRAMEWORK_ROOT))
+AGENT_FRAMEWORK_ROOT = os.environ.get("AGENT_FRAMEWORK_ROOT")
+if AGENT_FRAMEWORK_ROOT:
+    sys.path.insert(0, str(Path(AGENT_FRAMEWORK_ROOT).expanduser()))
 
-
-from agent import Agent, AgentDeploy, create_registry
+try:
+    from agent import Agent, AgentDeploy, create_registry
+except ImportError:
+    Agent = AgentDeploy = create_registry = None
 
 app = FastAPI(title = "LLM NPC Demo Gateway")
 
@@ -91,6 +95,8 @@ REPLIES_BY_STATE = {
 }
 
 def run_agent_reply(request: NpcChatRequest):
+    if create_registry is None:
+        raise RuntimeError("Agent framework not installed; using scripted demo fallback")
     captured_tool_name = None
     captured_tool_args = None
 
